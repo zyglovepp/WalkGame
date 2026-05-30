@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "WalkGameExpo",
-    "slug": "WalkGameExpo",
+    "name": "WalkGame",
+    "slug": "WalkGame",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
@@ -10,16 +10,26 @@
       "supportsTablet": true
     },
     "android": {
+      "package": "com.walkgame.app",
       "adaptiveIcon": {
         "backgroundColor": "#E6F4FE",
         "foregroundImage": "./assets/android-icon-foreground.png",
         "backgroundImage": "./assets/android-icon-background.png",
         "monochromeImage": "./assets/android-icon-monochrome.png"
       },
-      "predictiveBackGestureEnabled": false
+      "config": {
+        "googleMaps": {
+          "apiKey": "446dbe632e92bae038c8b07d516873dd"
+        }
+      }
     },
     "web": {
       "favicon": "./assets/favicon.png"
+    },
+    "extra": {
+      "eas": {
+        "projectId": "walkgame-mobile"
+      }
     }
   }
 }
