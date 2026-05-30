@@ -3,7 +3,11 @@
  */
 
 import axios, { AxiosInstance, AxiosResponse } from 'axios';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { API_BASE_URL } from '../config';
+
+// AsyncStorage 存储键
+const STORAGE_KEY_SERVER_URL = '@walkgame_server_url';
 
 // ============ 类型定义 ============
 
@@ -129,6 +133,21 @@ export interface CheckInResult {
 
 // ============ API 客户端 ============
 
+/**
+ * 初始化 API 客户端，支持从 AsyncStorage 读取自定义服务器地址
+ */
+async function getBaseUrl(): Promise<string> {
+  try {
+    const savedUrl = await AsyncStorage.getItem(STORAGE_KEY_SERVER_URL);
+    if (savedUrl) {
+      return savedUrl;
+    }
+  } catch (error) {
+    console.error('读取自定义服务器地址失败:', error);
+  }
+  return API_BASE_URL;
+}
+
 const apiClient: AxiosInstance = axios.create({
   baseURL: API_BASE_URL,
   timeout: 15000,
@@ -136,6 +155,18 @@ const apiClient: AxiosInstance = axios.create({
     'Content-Type': 'application/json',
   },
 });
+
+/**
+ * 更新 API 客户端的 baseURL
+ */
+export async function updateApiBaseUrl(): Promise<void> {
+  const baseUrl = await getBaseUrl();
+  apiClient.defaults.baseURL = baseUrl;
+  console.log('[API] baseURL 已更新为:', baseUrl);
+}
+
+// 应用启动时更新 baseURL
+updateApiBaseUrl();
 
 // 请求拦截器
 apiClient.interceptors.request.use(
@@ -307,6 +338,63 @@ export async function getUserStats(): Promise<UserStats | null> {
   } catch (error) {
     console.error('获取用户统计失败:', error);
     return null;
+  }
+}
+
+/**
+ * 测试服务器连接
+ * @param customUrl 可选的自定义服务器地址，如果不传则使用当前配置
+ */
+export async function testConnection(
+  customUrl?: string
+): Promise<{ success: boolean; message: string }> {
+  try {
+    const url = customUrl || apiClient.defaults.baseURL || API_BASE_URL;
+    const startTime = Date.now();
+
+    const response = await axios.get(`${url}/health`, {
+      timeout: 10000,
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+
+    const elapsed = Date.now() - startTime;
+
+    if (response.status >= 200 && response.status < 300) {
+      return {
+        success: true,
+        message: `连接成功 (${elapsed}ms)`,
+      };
+    }
+
+    return {
+      success: false,
+      message: `服务器返回异常状态码: ${response.status}`,
+    };
+  } catch (error: any) {
+    if (error.code === 'ECONNABORTED' || error.message?.includes('timeout')) {
+      return {
+        success: false,
+        message: '连接超时，请检查服务器地址是否正确',
+      };
+    }
+    if (error.code === 'ENOTFOUND' || error.code === 'EHOSTUNREACH') {
+      return {
+        success: false,
+        message: '无法连接到服务器，请检查地址和网络',
+      };
+    }
+    if (error.code === 'ECONNREFUSED') {
+      return {
+        success: false,
+        message: '服务器拒绝连接，请确认服务已启动',
+      };
+    }
+    return {
+      success: false,
+      message: `连接失败: ${error.message || '未知错误'}`,
+    };
   }
 }
 

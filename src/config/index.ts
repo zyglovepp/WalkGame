@@ -5,7 +5,7 @@
 // API 基础地址
 // Android 模拟器使用 10.0.2.2 访问本机
 // 真机调试时请改为电脑的局域网 IP（如 192.168.1.100）
-export const API_BASE_URL = 'http://10.0.2.2:3000/api';
+export const API_BASE_URL = 'http://172.27.183.76:3000/api';
 
 // 高德地图 Key
 export const AMAP_ANDROID_KEY = '446dbe632e92bae038c8b07d516873dd';

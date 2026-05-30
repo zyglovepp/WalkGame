@@ -1,6 +1,6 @@
 /**
  * WalkGame 主应用入口
- * 底部Tab导航：地图、记录、我的
+ * 底部Tab导航：地图、记录、我的、设置
  */
 
 import React from 'react';
@@ -12,12 +12,14 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 import MapScreen from './src/screens/MapScreen';
 import RecordsScreen from './src/screens/RecordsScreen';
 import ProfileScreen from './src/screens/ProfileScreen';
+import SettingsScreen from './src/screens/SettingsScreen';
 
 // Tab 导航类型定义
 type TabParamList = {
   Map: undefined;
   Records: undefined;
   Profile: undefined;
+  Settings: undefined;
 };
 
 const Tab = createBottomTabNavigator<TabParamList>();
@@ -39,6 +41,9 @@ export default function App() {
                   break;
                 case 'Profile':
                   icon = '👤';
+                  break;
+                case 'Settings':
+                  icon = '⚙️';
                   break;
               }
               return (
@@ -103,6 +108,13 @@ export default function App() {
             component={ProfileScreen}
             options={{
               title: '我的',
+            }}
+          />
+          <Tab.Screen
+            name="Settings"
+            component={SettingsScreen}
+            options={{
+              title: '设置',
             }}
           />
         </Tab.Navigator>
